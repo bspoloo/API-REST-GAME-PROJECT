@@ -24,6 +24,7 @@ namespace API_REST_GAME_PROJECT.Migrations
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
                 });
+
         }
 
         /// <inheritdoc />

@@ -2,6 +2,7 @@
 using API_REST_GAME_PROJECT.DTO.UserDTO;
 using API_REST_GAME_PROJECT.Models;
 using API_REST_GAME_PROJECT.Passwords;
+using API_REST_GAME_PROJECT.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -15,104 +16,86 @@ namespace API_REST_GAME_PROJECT.Controllers
     public class UserController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly UserService _userService;
 
         public UserController(AppDbContext context)
         {
             _context = context;
+            _userService = new UserService(context);
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
-            return await _context.Users.ToListAsync();
+
+            try
+            {
+                var users = await _userService.GetUsers();
+                return Ok(new { success = true, message = "Users retrived successfully", users });
+            }
+            catch (DbUpdateException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
         }
 
         //This function is used to create a new user
         [HttpPost]
         public async Task<ActionResult<User>> CreateUser([FromBody] CreateUserDTO userDto)
         {
-            User user = new User
+            try
             {
-                Name = userDto.Name,
-                Email = userDto.Email,
-                Password = userDto.Password
-            };
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, user);
+                var user = await _userService.CreateUser(userDto);
+                CreatedAtAction(nameof(GetUserById), new { id = user.Id }, user);
+                return Ok(new { success = true, message = "User created successfully", user });
+
+            }
+            catch (DbUpdateException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUserById(int id)
         {
-            var user = await _context.Users.FindAsync(id);
-
-            if (user == null)
+            try
             {
-                return NotFound(new
-                {
-                    success = false,
-                    message = "User not found"
-                });
+                var user = await _userService.GetUserById(id);
+                return Ok(new { success = true, message = "User retrieved successfully", user });
             }
-
-            return user;
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { success = false, message = ex.Message });
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult<User>> DeleteUserById(int id)
         {
-            var user = await _context.Users.FindAsync(id);
-
-            if (user == null)
+            try
             {
-                return NotFound(new
-                {
-                    success = false,
-                    message = "User not found"
-                });
+                var user = await _userService.DeleteUserById(id);
+                return Ok(new { success = true, message = "User removed successfully", user });
             }
-
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
-
-            return user;
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { success = false, message = ex.Message });
+            }
         }
         [HttpPut("{id}")]
-        public async Task<ActionResult<User>> UpdateUserById(int id, UpdateUserDTO userDTO)
+        public async Task<ActionResult<User>> UpdateUserById(int id, [FromBody] UpdateUserDTO userDTO)
         {
 
-            // Validar el modelo recibido
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
+                var updatedUser = await _userService.UpdateById(id, userDTO);
+                return Ok(new { success = true, message = "User updated successfully", updatedUser });
             }
-
-            var user = await _context.Users.FindAsync(id);
-
-            if (user == null)
+            catch (KeyNotFoundException ex)
             {
-                return NotFound(new
-                {
-                    success = false,
-                    message = "User not found"
-                });
+                return NotFound(new { success = false, message = ex.Message });
             }
-
-            user.Name = userDTO.Name;
-            user.Email = userDTO.Email;
-
-            if (!string.IsNullOrWhiteSpace(userDTO.Password))
-            {
-                // Encriptar la nueva contraseña
-                user.Password = Encrypt.EncryptPassword(userDTO.Password);
-            }
-
-            user.Password = userDTO.Password;
-
-            await _context.SaveChangesAsync();
-
-            return user;
         }
     }
 }
