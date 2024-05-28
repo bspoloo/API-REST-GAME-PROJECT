@@ -69,6 +69,19 @@ namespace API_REST_GAME_PROJECT.Controllers
                 return NotFound(new { success = false, message = ex.Message });
             }
         }
+        [HttpGet("Name/{Name}")]
+        public async Task<ActionResult<User>> GetUserByName(String Name)
+        {
+            try
+            {
+                var user = await _userService.GetUserByName(Name);
+                return Ok(new { success = true, message = "User retrieved successfully", user });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { success = false, message = ex.Message });
+            }
+        }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult<User>> DeleteUserById(int id)
