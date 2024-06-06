@@ -22,6 +22,7 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+// Enable middleware to serve generated Swagger as a JSON endpoint.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
