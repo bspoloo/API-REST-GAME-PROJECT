@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace API_REST_GAME_PROJECT.Controllers
 {
+    // This class is a controller for the User model
     [ApiController]
     [Route("api/v1/users")]
     public class UserController : ControllerBase
