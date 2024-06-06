@@ -4,7 +4,10 @@
     {
         public static string EncryptPassword(string password)
         {
-            // Aquí podrías usar cualquier método de encriptación como bcrypt, por ejemplo:
+            if (BCryptHash.IsBCryptHash(password))
+            {
+                return password;
+            }
             return BCrypt.Net.BCrypt.HashPassword(password);
         }
     }

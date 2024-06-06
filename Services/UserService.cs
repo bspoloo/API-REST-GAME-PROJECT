@@ -61,6 +61,15 @@ namespace API_REST_GAME_PROJECT.Services
             await _context.SaveChangesAsync();
             return user;
         }
+        public async Task<User> GetUserByName(String name)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Name == name);
+            if (user == null)
+            {
+                throw new KeyNotFoundException("User not found with that Name");
+            }
+            return user;
+        }
         public async Task<User> UpdateById(int id, [FromBody] UpdateUserDTO userDTO)
         {
             var user = await _context.Users.FindAsync(id);
@@ -76,7 +85,6 @@ namespace API_REST_GAME_PROJECT.Services
 
             if (!string.IsNullOrWhiteSpace(userDTO.Password))
             {
-                // Encriptar la nueva contraseña
                 user.Password = Encrypt.EncryptPassword(userDTO.Password);
             }
 
