@@ -1,27 +1,20 @@
 name: Publish
-
 on:
   push:
     branches:
       - master
-
 jobs:
-  publis:
+  publish:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
-
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 6.0.x
-
     - name: Restore
-      run: dotnet restore ./API REST GAME PROJECT.sln 
-
+      run: dotnet restore ./APIRestGameProject.sln
     - name: Build
-      run: dotnet build ./API REST GAME PROJECT.sln --configuration Release --no-restore
-
+      run: dotnet build ./APIRestGameProject.sln --configuration Release --no-restore
     - name: Publish
-      run: dotnet publish ./API REST GAME PROJECT.sln --configuration Release --no-restore Release --no-build
+      run: dotnet publish ./APIRestGameProject.sln --configuration Release --no-restore --no-build
